@@ -68,6 +68,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: qa-agent/auto-tests-${{ github.run_id }}
           base: dev
+          # Only commit changes under tests/ -- keeps the action's own
+          # checkout dir (.qa-agent) and any other workspace clutter out
+          # of the PR diff.
+          add-paths: |
+            tests/**
           commit-message: |
             Agent-generated tests for changes in ${{ github.sha }}
 

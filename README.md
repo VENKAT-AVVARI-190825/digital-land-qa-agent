@@ -32,8 +32,23 @@ dl-qa list-targets                    # show configured targets
 dl-qa run \
   --target pyspark-jobs \
   --goal "Unit tests for jobs.utils.flatten_csv"
+
+# Or: run against every source file changed in a git ref range (or explicit list)
+dl-qa diff --target pyspark-jobs --base origin/main --head HEAD
+dl-qa diff --target pyspark-jobs --files src/jobs/utils/flatten_csv.py
+
 dl-qa metrics                         # aggregate stats across all runs
 ```
+
+## Use as a GitHub Action
+
+This repo ships an [action.yml](action.yml) so it can be consumed from any target repo's workflow. When a developer pushes a feature, the action enumerates the changed source files, runs the pipeline per file, and the consuming workflow opens a PR back into the target branch with the staged tests.
+
+See [examples/pyspark-jobs-qa-agent.yml](examples/pyspark-jobs-qa-agent.yml) for a complete consumer workflow. Key properties:
+- Triggers on push, filtered to source files only.
+- Uses `peter-evans/create-pull-request` to open the PR — agent never commits directly.
+- Marks the PR as `draft` when the Critic flags anything for review.
+- Respects `max-files` as a cost cap.
 
 Without `ANTHROPIC_API_KEY` set, the framework runs in **mock mode** — deterministic stubs return canned responses so you can exercise the full pipeline without burning tokens. Set `ANTHROPIC_API_KEY` to switch to live Claude calls.
 

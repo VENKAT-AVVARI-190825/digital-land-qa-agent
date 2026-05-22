@@ -85,11 +85,28 @@ cat config/targets/pyspark-jobs.yaml
 # 3. Run the full pipeline (mock mode, no API key needed)
 dl-qa run --target pyspark-jobs --goal "Unit tests for jobs.utils.flatten_csv"
 
-# 4. Show the staged output + audit log side-by-side in IDE
+# 4. Run against an explicit changed file (what the GitHub Action does per push)
+dl-qa diff --target pyspark-jobs --files src/jobs/utils/flatten_csv.py
+
+# 5. Show the staged output + audit log side-by-side in IDE
 ls runs/<ts>/
 
-# 5. Show observability across runs
+# 6. Show observability across runs
 dl-qa metrics
+
+# 7. (If asked) show how a target repo would trigger this on every push
+cat examples/pyspark-jobs-qa-agent.yml
+cat action.yml
 ```
 
 The most persuasive single visual: open the staged test file alongside the `audit.jsonl` in the IDE so the auditor can see every decision the system made.
+
+## Common follow-up: "How do you trigger this from a developer push?"
+
+Three pieces — see [README.md](README.md#use-as-a-github-action) for full detail:
+
+1. **`dl-qa diff`** enumerates changed files between two git refs, runs the pipeline per file, caps at `--max-files` for cost control.
+2. **[action.yml](action.yml)** packages the framework as a composite GitHub Action — any target repo can `uses:` it.
+3. **[examples/pyspark-jobs-qa-agent.yml](examples/pyspark-jobs-qa-agent.yml)** is the consumer workflow pyspark-jobs would drop into `.github/workflows/`. On push to `dev`, it runs the action and opens a PR (via `peter-evans/create-pull-request`) — draft if any file needs review. **Agent never commits to the target directly.**
+
+That preserves the HITL guarantee at the infrastructure level: even if the agent mis-generates, the worst case is a noisy PR — never a polluted main branch.

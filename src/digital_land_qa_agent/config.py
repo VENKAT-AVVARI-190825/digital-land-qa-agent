@@ -61,14 +61,21 @@ class TargetConfig:
     extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def load(cls, name: str) -> "TargetConfig":
+    def load(cls, name: str, override_path: Path | None = None) -> "TargetConfig":
+        """Load a target's YAML by name. ``override_path`` replaces the
+        configured ``path`` at runtime — useful in CI where the target lives
+        at the workspace, not where the YAML hardcodes it.
+        """
         path = CONFIG_DIR / "targets" / f"{name}.yaml"
         if not path.exists():
             raise FileNotFoundError(
                 f"No target config at {path}. Copy config/targets/_template.yaml and edit."
             )
         data = yaml.safe_load(path.read_text())
-        repo_path = Path(data["path"]).expanduser().resolve()
+        if override_path is not None:
+            repo_path = Path(override_path).expanduser().resolve()
+        else:
+            repo_path = Path(data["path"]).expanduser().resolve()
         known_keys = {
             "name", "path", "language", "framework", "test_framework",
             "src_dirs", "test_dir", "data_quality", "notes", "lint_commands",

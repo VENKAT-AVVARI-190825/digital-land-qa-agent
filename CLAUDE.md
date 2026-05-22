@@ -21,8 +21,20 @@ make clean        # wipes runs/, caches, egg-info
 CLI entrypoint: `dl-qa` → `digital_land_qa_agent.__main__:cli`. Subcommands:
 - `dl-qa list-targets` — show configured targets
 - `dl-qa profile --target <name>` — run only the Profiler stage
-- `dl-qa run --target <name> --goal "<goal>"` — full pipeline
+- `dl-qa run --target <name> --goal "<goal>"` — full pipeline against one goal
+- `dl-qa diff --target <name> --base <ref> [--head <ref>] [--files <path>...]` — run the pipeline against every changed source file (used by the GitHub Action)
 - `dl-qa metrics` — aggregate observability across every `runs/<ts>/` (approval rate, revisions, tokens)
+
+All commands accept `--target-path <dir>` to override the configured target path (used by the GitHub Action to point at `$GITHUB_WORKSPACE`).
+
+## GitHub Action
+
+The repo's [action.yml](action.yml) at the root makes it consumable as a composite GitHub Action. The intended consumer pattern (see [examples/pyspark-jobs-qa-agent.yml](examples/pyspark-jobs-qa-agent.yml)):
+1. Target repo's workflow fires on push to a branch and `paths: src/**/*.py`.
+2. Workflow checks out target + this action.
+3. Action runs `dl-qa diff` against the changed files.
+4. Staged tests are copied into a PR branch via `peter-evans/create-pull-request`.
+5. A human reviews. Never auto-merge.
 
 ## Layout
 

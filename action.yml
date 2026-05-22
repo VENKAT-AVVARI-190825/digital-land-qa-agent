@@ -1,0 +1,113 @@
+name: 'digital-land QA Agent'
+description: >
+  Multi-agent QA automation. Given a target repo + a git ref range, generates
+  pytest tests for every changed source file and stages them in this repo's
+  runs/ directory. Pair with peter-evans/create-pull-request to open a PR
+  with the staged tests back into the consuming repo.
+
+inputs:
+  target:
+    description: >
+      Target name (matches config/targets/<name>.yaml in this action's repo).
+    required: true
+  target-path:
+    description: >
+      Absolute path to the target repo checkout. In a consumer workflow this
+      is usually $GITHUB_WORKSPACE.
+    required: true
+  base-ref:
+    description: 'Git ref before the push (e.g. github.event.before).'
+    required: false
+    default: ''
+  head-ref:
+    description: 'Git ref after the push.'
+    required: false
+    default: 'HEAD'
+  files:
+    description: >
+      Space-separated list of explicit source files to test. If set, bypasses
+      git-diff enumeration. Useful with dorny/paths-filter to pass changed
+      files directly.
+    required: false
+    default: ''
+  max-files:
+    description: 'Refuse to run if more than this many files would be processed.'
+    required: false
+    default: '10'
+  python-version:
+    description: 'Python version to use.'
+    required: false
+    default: '3.11'
+
+outputs:
+  staged-dir:
+    description: 'Directory under runs/ containing staged tests.'
+    value: ${{ steps.dl-qa.outputs.staged-dir }}
+  needs-review:
+    description: '"true" if at least one generated file needs human review.'
+    value: ${{ steps.dl-qa.outputs.needs-review }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install agent + target's Python linters
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e "${{ github.action_path }}[targets-python]"
+
+    - name: Run dl-qa diff
+      id: dl-qa
+      shell: bash
+      env:
+        # Caller must export ANTHROPIC_API_KEY at the workflow level if they
+        # want live mode; otherwise the agent runs in deterministic mock mode.
+        ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY }}
+      run: |
+        set -euo pipefail
+
+        cmd=(dl-qa diff
+          --target "${{ inputs.target }}"
+          --target-path "${{ inputs.target-path }}"
+          --head "${{ inputs.head-ref }}"
+          --max-files "${{ inputs.max-files }}")
+
+        if [ -n "${{ inputs.files }}" ]; then
+          for f in ${{ inputs.files }}; do
+            cmd+=(--files "$f")
+          done
+        elif [ -n "${{ inputs.base-ref }}" ]; then
+          cmd+=(--base "${{ inputs.base-ref }}")
+        else
+          echo "::error::Provide either inputs.base-ref or inputs.files"
+          exit 2
+        fi
+
+        # The CLI exits 1 if any file needs review, but we still want to
+        # surface the staged output. Capture exit and report via outputs.
+        set +e
+        "${cmd[@]}"
+        rc=$?
+        set -e
+
+        latest_run=$(ls -td "${{ github.action_path }}"/runs/*/ | head -1 || true)
+        if [ -n "$latest_run" ]; then
+          echo "staged-dir=${latest_run%/}" >> "$GITHUB_OUTPUT"
+        fi
+
+        if [ "$rc" -eq 1 ]; then
+          echo "needs-review=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "needs-review=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        exit "$rc"
+
+branding:
+  icon: check-circle
+  color: blue

@@ -6,6 +6,12 @@ Personal reference for mapping this repo to a Technical Lead JD focused on agent
 
 This repo covers ~80% of the JD's **AI / QA-automation pillar** (agentic AI, test automation, HITL, observability, CI). It does **not** touch the **Google Analytics pillar** — that's a separate competency to handle separately. The PoC is deliberately scoped to prove the agentic-AI loop works against a real client repo (`digital-land/pyspark-jobs`).
 
+## Live evidence (open if interviewer asks "does it actually work?")
+
+- **Agent repo:** https://github.com/VENKAT-AVVARI-190825/digital-land-qa-agent (public, CI green)
+- **Target repo mirror:** https://github.com/VENKAT-AVVARI-190825/pyspark-jobs (private, only the `qa-agent` workflow installed)
+- **Auto-opened PR:** https://github.com/VENKAT-AVVARI-190825/pyspark-jobs/pull/2 — triggered by pushing a docstring change to `dev`. Workflow finished in 26 seconds. PR diff contains only the agent-generated test file; `github-actions` is the author; the reviewer checklist is in the PR body. Labels `qa-agent`, `tests`. The developer made no test edits — the agent did.
+
 ---
 
 ## Responsibilities → repo
@@ -56,7 +62,7 @@ This repo covers ~80% of the JD's **AI / QA-automation pillar** (agentic AI, tes
 >
 > Every model call and tool call lands in an audit log, and `dl-qa metrics` rolls them up — approval rate, average revisions, token spend — so I can tell whether prompt or model changes are actually improving the system.
 >
-> The human-in-the-loop boundary is enforced architecturally — the agent literally cannot write into the target repo. Generated tests stage in this framework's `runs/` directory; a human moves them across.
+> The human-in-the-loop boundary is enforced architecturally — the agent literally cannot write into the target repo. Generated tests stage in this framework's `runs/` directory, and the GitHub Action opens a pull request via `peter-evans/create-pull-request` so the agent never gets commit access to the target. I have a live PR open right now where a docstring push to `dev` triggered the agent and produced a clean tests-only PR in 26 seconds.
 >
 > I've kept the Google Analytics pillar separate; that's a different conversation."
 
@@ -107,6 +113,8 @@ Three pieces — see [README.md](README.md#use-as-a-github-action) for full deta
 
 1. **`dl-qa diff`** enumerates changed files between two git refs, runs the pipeline per file, caps at `--max-files` for cost control.
 2. **[action.yml](action.yml)** packages the framework as a composite GitHub Action — any target repo can `uses:` it.
-3. **[examples/pyspark-jobs-qa-agent.yml](examples/pyspark-jobs-qa-agent.yml)** is the consumer workflow pyspark-jobs would drop into `.github/workflows/`. On push to `dev`, it runs the action and opens a PR (via `peter-evans/create-pull-request`) — draft if any file needs review. **Agent never commits to the target directly.**
+3. **[examples/pyspark-jobs-qa-agent.yml](examples/pyspark-jobs-qa-agent.yml)** is the consumer workflow pyspark-jobs would drop into `.github/workflows/`. On push to `dev`, it runs the action and opens a PR (via `peter-evans/create-pull-request` scoped to `add-paths: tests/**` so only generated test files end up in the diff) — draft if any file needs review. **Agent never commits to the target directly.**
 
 That preserves the HITL guarantee at the infrastructure level: even if the agent mis-generates, the worst case is a noisy PR — never a polluted main branch.
+
+**Working example:** https://github.com/VENKAT-AVVARI-190825/pyspark-jobs/pull/2 — the PR that the docstring push to `dev` produced. 28-second run, clean diff (only `tests/unit/utils/test_flatten_csv.py`), Critic verdict `needs-review=false`.

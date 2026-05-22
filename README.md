@@ -46,9 +46,11 @@ This repo ships an [action.yml](action.yml) so it can be consumed from any targe
 
 See [examples/pyspark-jobs-qa-agent.yml](examples/pyspark-jobs-qa-agent.yml) for a complete consumer workflow. Key properties:
 - Triggers on push, filtered to source files only.
-- Uses `peter-evans/create-pull-request` to open the PR — agent never commits directly.
+- Uses `peter-evans/create-pull-request` (scoped via `add-paths: tests/**`) to open the PR — agent never commits directly and only test files land in the diff.
 - Marks the PR as `draft` when the Critic flags anything for review.
 - Respects `max-files` as a cost cap.
+
+**Live proof:** [VENKAT-AVVARI-190825/pyspark-jobs#2](https://github.com/VENKAT-AVVARI-190825/pyspark-jobs/pull/2) is a PR the agent opened in response to a docstring push on `dev`. 28-second workflow run, clean diff (only the generated test file), Critic verdict `needs-review=false`.
 
 Without `ANTHROPIC_API_KEY` set, the framework runs in **mock mode** — deterministic stubs return canned responses so you can exercise the full pipeline without burning tokens. Set `ANTHROPIC_API_KEY` to switch to live Claude calls.
 

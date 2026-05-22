@@ -20,8 +20,28 @@ def test_python_compile_fails_on_syntax_error(tmp_path):
     assert not result.ok
 
 
-def test_ruff_passes_on_clean_file(tmp_path):
+def test_run_command_returns_127_when_command_missing(tmp_path):
+    f = tmp_path / "x"
+    f.write_text("")
+    result = runners.run_command(["this-command-does-not-exist-xyz", str(f)])
+    assert not result.ok
+    assert result.returncode == 127
+
+
+def test_run_lint_commands_substitutes_file_placeholder(tmp_path):
+    """{file} in argv gets replaced with the absolute file path."""
     f = tmp_path / "ok.py"
-    f.write_text('"""Doc."""\n\nX = 1\n')
-    result = runners.run_ruff(f)
-    assert result.ok, result.stdout + result.stderr
+    f.write_text("x = 1\n")
+    results = runners.run_lint_commands(
+        [["python", "-c", "import sys; print(sys.argv[1])", "{file}"]],
+        f,
+    )
+    assert len(results) == 1
+    assert results[0].ok
+    assert str(f.resolve()) in results[0].stdout
+
+
+def test_run_lint_commands_empty_list_returns_empty(tmp_path):
+    f = tmp_path / "ok.py"
+    f.write_text("x = 1\n")
+    assert runners.run_lint_commands([], f) == []

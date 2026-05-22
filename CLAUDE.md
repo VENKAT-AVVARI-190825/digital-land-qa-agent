@@ -53,8 +53,16 @@ Each agent has its own system prompt under `prompts/`. The orchestrator passes s
 
 ## Critic gates
 
-Approval requires **all** of: LLM verdict == `approved`, `ruff check` clean, `python -m py_compile` clean.
+Approval requires **all** of:
+- LLM verdict == `approved`
+- `python -m py_compile` clean
+- every command in the target's `lint_commands` exits 0
+
+Lint commands are declared per target in `config/targets/<name>.yaml`. The Critic runs each command with `cwd=<target_root>` so the linter picks up the target's own config files (`.flake8`, `.isort.cfg`, `pyproject.toml`). The framework itself does not hardcode a linter — `pyspark-jobs` uses black + flake8 + isort; a different target could use ruff, eslint, etc.
+
 `pytest --collect-only` is run for information but does **not** gate approval — the target repo's runtime deps (pyspark, sedona, etc.) are usually not installed in this venv, so the real collect happens when the staged test is moved to the target.
+
+To run the pyspark-jobs demo locally, install the optional target-python extras alongside dev: `pip install -e ".[dev,targets-python]"`.
 
 ## Defaults you should preserve
 

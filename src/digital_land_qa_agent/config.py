@@ -54,6 +54,10 @@ class TargetConfig:
     test_dir: str | None = None
     data_quality: bool = False
     notes: str = ""
+    # Each entry is an argv list. ``{file}`` is replaced with the absolute
+    # path of the staged test file at run time. Commands run with cwd set to
+    # the target repo root so they pick up the target's own lint configs.
+    lint_commands: list[list[str]] = field(default_factory=list)
     extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
@@ -65,6 +69,10 @@ class TargetConfig:
             )
         data = yaml.safe_load(path.read_text())
         repo_path = Path(data["path"]).expanduser().resolve()
+        known_keys = {
+            "name", "path", "language", "framework", "test_framework",
+            "src_dirs", "test_dir", "data_quality", "notes", "lint_commands",
+        }
         return cls(
             name=data["name"],
             path=repo_path,
@@ -75,10 +83,8 @@ class TargetConfig:
             test_dir=data.get("test_dir"),
             data_quality=data.get("data_quality", False),
             notes=data.get("notes", ""),
-            extra={k: v for k, v in data.items() if k not in {
-                "name", "path", "language", "framework", "test_framework",
-                "src_dirs", "test_dir", "data_quality", "notes",
-            }},
+            lint_commands=data.get("lint_commands", []),
+            extra={k: v for k, v in data.items() if k not in known_keys},
         )
 
 

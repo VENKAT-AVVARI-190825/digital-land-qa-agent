@@ -96,7 +96,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "sr
 
 import pytest  # noqa: E402
 
-from jobs.utils.flatten_csv import flatten_geojson_column, flatten_json_column  # noqa: E402
+from jobs.utils.flatten_csv import flatten_geojson_column  # noqa: E402
+from jobs.utils.flatten_csv import flatten_json_column  # noqa: E402
 
 
 @pytest.mark.unit

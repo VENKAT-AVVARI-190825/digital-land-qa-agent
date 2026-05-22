@@ -25,7 +25,9 @@ The Critic gates output on `ruff` and Python compile checks before anything reac
 ## Quick start
 
 ```bash
-make dev                              # editable install with dev extras
+# Editable install with dev extras + the linters pyspark-jobs uses
+pip install -e ".[dev,targets-python]"
+
 dl-qa list-targets                    # show configured targets
 dl-qa run \
   --target pyspark-jobs \
@@ -52,6 +54,7 @@ Without `ANTHROPIC_API_KEY` set, the framework runs in **mock mode** — determi
 
 - **Separation of concerns between agents.** Each agent has a narrow role and its own system prompt. When the pipeline produces a bad output, the audit log makes it obvious *which* agent failed.
 - **Human-in-the-loop by default.** `hitl_required: true` in [`config/settings.yaml`](config/settings.yaml). The agent stages, the human decides.
+- **No hardcoded linter.** The Critic runs whatever lint commands the target repo declares in its `config/targets/<name>.yaml` (black + flake8 + isort for pyspark-jobs; a different target could use ruff, eslint, etc.). Commands run from the target repo's root so they pick up its own config files.
 - **Sandboxed tool surface.** [`tools/fs.py`](src/digital_land_qa_agent/tools/fs.py) raises `SandboxError` on any path escape. No tool can write outside the per-run staging directory.
 - **Deterministic fallback.** Mock mode means the framework's own CI doesn't depend on a live API and the demo is reproducible.
 - **Traceable decisions.** Every model call, every tool call, every artifact is recorded in `runs/<ts>/audit.jsonl`.

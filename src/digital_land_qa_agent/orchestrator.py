@@ -30,10 +30,14 @@ class PipelineResult:
         v = self.verdict
         status = "APPROVED" if self.approved else "NEEDS REVIEW"
         sc = v["static_checks"]
+        lint_summary = ", ".join(
+            f"{' '.join(r['command'][:2])}={'ok' if r['ok'] else 'FAIL'}"
+            for r in sc.get("lint_per_command", [])
+        ) or "no lint commands configured"
         return (
             f"[{status}] {self.plan.get('target_module')} -> {self.staged_path}\n"
-            f"  ruff_ok={sc['ruff_ok']} compile_ok={sc['compile_ok']} "
-            f"pytest_collect_ok={sc['pytest_collect_ok']} (informational)\n"
+            f"  compile_ok={sc['compile_ok']}  lint=({lint_summary})\n"
+            f"  pytest_collect_ok={sc['pytest_collect_ok']} (informational)\n"
             f"  notes: {v.get('notes', '')}"
         )
 
@@ -57,7 +61,7 @@ def run_pipeline(
     plan = planner.plan(goal, profile)
 
     staged_path = writer.write(plan, target)
-    verdict = critic.review(staged_path, plan, profile, target_root=target.path)
+    verdict = critic.review(staged_path, plan, profile, target=target)
 
     revisions = 0
     while not verdict["approved"] and revisions < max_revisions:
@@ -67,7 +71,7 @@ def run_pipeline(
         # critic's issues would be appended to the writer's prompt. We keep
         # this minimal for v1 — the critic's verdict.json is the audit trail.
         staged_path = writer.write(plan, target)
-        verdict = critic.review(staged_path, plan, profile, target_root=target.path)
+        verdict = critic.review(staged_path, plan, profile, target=target)
 
     run.log(
         "pipeline_finished",

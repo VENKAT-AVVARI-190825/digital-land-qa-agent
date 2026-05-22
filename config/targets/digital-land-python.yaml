@@ -6,5 +6,8 @@ test_framework: pytest
 src_dirs: [digital_land/]
 test_dir: tests/
 data_quality: false
+# Placeholder: confirm against the target's own lint config before relying on this.
+lint_commands:
+  - ["flake8", "{file}"]
 notes: |
   Core digital-land Python tooling (data pipelines, validators, CLI).

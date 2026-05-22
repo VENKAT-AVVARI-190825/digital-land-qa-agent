@@ -26,6 +26,16 @@ path: /absolute/path/to/repo
 # Optional: enable data-quality checks for data-pipeline repos.
 # data_quality: true
 
+# Optional: lint commands the Critic should run against each staged test file.
+# {file} is replaced with the absolute path of the staged file. Commands run
+# from the target repo root so per-repo lint configs (.flake8, .isort.cfg,
+# pyproject.toml) are picked up automatically. All commands must exit 0 for
+# the Critic to approve.
+# lint_commands:
+#   - ["ruff", "check", "{file}"]                # if the target uses ruff
+#   - ["black", "--check", "--quiet", "{file}"]  # if the target uses black
+#   - ["flake8", "{file}"]                       # if the target uses flake8
+
 # Optional: extra context that helps the agent (read into the system prompt).
 # notes: |
 #   This repo runs on EMR. Tests assume PySpark 3.4. Avoid network calls in tests.

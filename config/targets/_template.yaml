@@ -1,0 +1,31 @@
+# Template for a target repo. Copy to <repo-name>.yaml and fill in the path.
+# Most fields are auto-detected from the repo if omitted — see ProfilerAgent.
+
+# Logical name (used on the CLI: `dl-qa run --target <name>`).
+name: my-repo
+
+# Absolute path to a local clone of the target repo.
+path: /absolute/path/to/repo
+
+# Optional: pin language and framework so the profiler skips detection.
+# Common values:
+#   language: python | typescript | javascript
+#   framework: pyspark | django | fastapi | flask | react | node | generic-python
+# language: python
+# framework: pyspark
+
+# Optional: pin the test runner (otherwise inferred).
+#   python:  pytest | unittest
+#   js/ts:   jest | vitest | mocha
+# test_framework: pytest
+
+# Optional: tell the agent where to look. Defaults are reasonable.
+# src_dirs: [src/]
+# test_dir: tests/
+
+# Optional: enable data-quality checks for data-pipeline repos.
+# data_quality: true
+
+# Optional: extra context that helps the agent (read into the system prompt).
+# notes: |
+#   This repo runs on EMR. Tests assume PySpark 3.4. Avoid network calls in tests.

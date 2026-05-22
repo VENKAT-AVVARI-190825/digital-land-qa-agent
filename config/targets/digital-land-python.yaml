@@ -1,0 +1,10 @@
+name: digital-land-python
+path: ~/repos/digital-land-python
+language: python
+framework: generic-python
+test_framework: pytest
+src_dirs: [digital_land/]
+test_dir: tests/
+data_quality: false
+notes: |
+  Core digital-land Python tooling (data pipelines, validators, CLI).

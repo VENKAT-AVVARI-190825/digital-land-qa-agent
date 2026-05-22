@@ -1,0 +1,11 @@
+name: pyspark-jobs
+path: ~/repos/pyspark-jobs
+language: python
+framework: pyspark
+test_framework: pytest
+src_dirs: [src/jobs, src/analytics, src/infra]
+test_dir: tests/
+data_quality: true
+notes: |
+  PySpark transformations under src/jobs. Existing pytest suite in tests/{unit,integration,acceptance}.
+  Prefer pyspark.sql DataFrame fixtures over real cluster runs in unit tests.

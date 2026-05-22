@@ -1,0 +1,22 @@
+# Global QA-agent settings. Override per-target in config/targets/<name>.yaml.
+
+# Default Claude model. Opus 4.7 for highest capability on agentic loops.
+model: claude-opus-4-7
+
+# Adaptive thinking lets Claude decide reasoning depth per turn.
+thinking: adaptive
+
+# Effort: xhigh is the recommended setting for coding/agentic use cases on Opus 4.7.
+effort: xhigh
+
+# Task budget across one agent run (token countdown the model sees).
+task_budget_tokens: 200000
+
+# Hard per-response ceiling. Streaming is enabled at this size.
+max_tokens: 64000
+
+# Cap how many tool-use rounds the orchestrator runs per agent (safety brake).
+max_tool_rounds: 12
+
+# Require human approval before any file is written or test is committed.
+hitl_required: true

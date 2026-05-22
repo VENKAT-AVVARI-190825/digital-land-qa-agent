@@ -71,6 +71,53 @@ def run(target: str, goal: str, max_revisions: int) -> None:
 
 
 @cli.command()
+def metrics() -> None:
+    """Aggregate observability across every run under runs/."""
+    from digital_land_qa_agent.metrics import collect
+
+    settings = Settings.load()
+    agg = collect(settings.runs_dir)
+
+    if agg.total_runs == 0:
+        console.print(f"[yellow]No runs found under {settings.runs_dir}[/]")
+        return
+
+    summary = Table(title=f"Pipeline metrics ({agg.total_runs} runs)")
+    summary.add_column("Metric")
+    summary.add_column("Value", justify="right")
+    summary.add_row("Approved", str(agg.approved))
+    summary.add_row("Needs review", str(agg.needs_review))
+    summary.add_row("Incomplete", str(agg.incomplete))
+    summary.add_row("Approval rate", f"{agg.approval_rate:.0%}")
+    summary.add_row("Avg revisions / run", f"{agg.avg_revisions:.2f}")
+    summary.add_row("Total input tokens", f"{agg.total_input_tokens:,}")
+    summary.add_row("Total output tokens", f"{agg.total_output_tokens:,}")
+    summary.add_row("Mode counts", ", ".join(f"{k}={v}" for k, v in sorted(agg.mode_counts.items())))
+    console.print(summary)
+
+    detail = Table(title="Per-run")
+    detail.add_column("Run")
+    detail.add_column("Mode")
+    detail.add_column("Goal", overflow="fold")
+    detail.add_column("Revs", justify="right")
+    detail.add_column("In", justify="right")
+    detail.add_column("Out", justify="right")
+    detail.add_column("Verdict")
+    for r in agg.per_run[-20:]:  # show only the most recent 20
+        verdict = "approved" if r.approved else ("needs review" if r.approved is False else "incomplete")
+        detail.add_row(
+            r.run_id,
+            r.llm_mode or "?",
+            r.goal or "",
+            str(r.revisions),
+            f"{r.input_tokens:,}",
+            f"{r.output_tokens:,}",
+            verdict,
+        )
+    console.print(detail)
+
+
+@cli.command()
 @click.option("--target", required=True)
 def profile(target: str) -> None:
     """Run just the Profiler stage and print the RepoProfile."""

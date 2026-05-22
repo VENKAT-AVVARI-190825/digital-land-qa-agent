@@ -22,6 +22,7 @@ CLI entrypoint: `dl-qa` → `digital_land_qa_agent.__main__:cli`. Subcommands:
 - `dl-qa list-targets` — show configured targets
 - `dl-qa profile --target <name>` — run only the Profiler stage
 - `dl-qa run --target <name> --goal "<goal>"` — full pipeline
+- `dl-qa metrics` — aggregate observability across every `runs/<ts>/` (approval rate, revisions, tokens)
 
 ## Layout
 
@@ -30,6 +31,7 @@ CLI entrypoint: `dl-qa` → `digital_land_qa_agent.__main__:cli`. Subcommands:
   - [config.py](src/digital_land_qa_agent/config.py) — `Settings` (global) + `TargetConfig` (per-repo) loaders
   - [orchestrator.py](src/digital_land_qa_agent/orchestrator.py) — sequential pipeline + `PipelineResult`
   - [runs.py](src/digital_land_qa_agent/runs.py) — per-run staging dir + JSONL audit log
+  - [metrics.py](src/digital_land_qa_agent/metrics.py) — cross-run rollup feeding `dl-qa metrics`
   - `agents/` — `ProfilerAgent`, `PlannerAgent`, `TestWriterAgent`, `CriticAgent` (all extend `agents.base.BaseAgent`)
   - `llm/` — `client.LiveClient` (Anthropic SDK) + `mock.MockClient` (deterministic fixtures); `build_client()` picks based on `ANTHROPIC_API_KEY`
   - `llm/fixtures.py` — pre-canned content blocks the mock returns, keyed by agent name

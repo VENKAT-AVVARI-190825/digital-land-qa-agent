@@ -37,7 +37,8 @@ targets-python = [
 dl-qa = "digital_land_qa_agent.__main__:cli"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["digital_land_qa_agent*"]
 
 [tool.ruff]
 line-length = 100

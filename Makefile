@@ -10,11 +10,11 @@ test:
 	pytest
 
 lint:
-	ruff check src tests
+	ruff check digital_land_qa_agent tests
 
 demo:
 	python -m digital_land_qa_agent run --target pyspark-jobs --goal "Generate unit tests for one transformation"
 
 clean:
-	rm -rf runs/ .pytest_cache/ .coverage htmlcov/ *.egg-info src/*.egg-info
+	rm -rf runs/ .pytest_cache/ .coverage htmlcov/ *.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} +

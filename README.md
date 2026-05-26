@@ -58,21 +58,21 @@ Without `ANTHROPIC_API_KEY` set, the framework runs in **mock mode** — determi
 
 | Layer | Module | Responsibility |
 |---|---|---|
-| CLI | [`__main__.py`](src/digital_land_qa_agent/__main__.py) | `dl-qa run / list-targets / profile / metrics` |
-| Orchestration | [`orchestrator.py`](src/digital_land_qa_agent/orchestrator.py) | Sequential pipeline, HITL gate, revision loop |
-| Agents | [`agents/`](src/digital_land_qa_agent/agents/) | Profiler, Planner, TestWriter, Critic |
-| LLM | [`llm/`](src/digital_land_qa_agent/llm/) | Anthropic SDK wrapper + deterministic mock |
-| Tools | [`tools/`](src/digital_land_qa_agent/tools/) | Sandboxed FS + subprocess runners (ruff, py_compile) |
-| Prompts | [`prompts/`](src/digital_land_qa_agent/prompts/) | One Markdown system prompt per agent |
-| Observability | [`runs.py`](src/digital_land_qa_agent/runs.py), [`metrics.py`](src/digital_land_qa_agent/metrics.py) | Per-run JSONL audit + cross-run rollup |
-| Config | [`config.py`](src/digital_land_qa_agent/config.py), [`config/`](config/) | Global settings + per-target YAML |
+| CLI | [`__main__.py`](digital_land_qa_agent/__main__.py) | `dl-qa run / list-targets / profile / metrics` |
+| Orchestration | [`orchestrator.py`](digital_land_qa_agent/orchestrator.py) | Sequential pipeline, HITL gate, revision loop |
+| Agents | [`agents/`](digital_land_qa_agent/agents/) | Profiler, Planner, TestWriter, Critic |
+| LLM | [`llm/`](digital_land_qa_agent/llm/) | Anthropic SDK wrapper + deterministic mock |
+| Tools | [`tools/`](digital_land_qa_agent/tools/) | Sandboxed FS + subprocess runners (ruff, py_compile) |
+| Prompts | [`prompts/`](digital_land_qa_agent/prompts/) | One Markdown system prompt per agent |
+| Observability | [`runs.py`](digital_land_qa_agent/runs.py), [`metrics.py`](digital_land_qa_agent/metrics.py) | Per-run JSONL audit + cross-run rollup |
+| Config | [`config.py`](digital_land_qa_agent/config.py), [`config/`](config/) | Global settings + per-target YAML |
 
 ## Design principles
 
 - **Separation of concerns between agents.** Each agent has a narrow role and its own system prompt. When the pipeline produces a bad output, the audit log makes it obvious *which* agent failed.
 - **Human-in-the-loop by default.** `hitl_required: true` in [`config/settings.yaml`](config/settings.yaml). The agent stages, the human decides.
 - **No hardcoded linter.** The Critic runs whatever lint commands the target repo declares in its `config/targets/<name>.yaml` (black + flake8 + isort for pyspark-jobs; a different target could use ruff, eslint, etc.). Commands run from the target repo's root so they pick up its own config files.
-- **Sandboxed tool surface.** [`tools/fs.py`](src/digital_land_qa_agent/tools/fs.py) raises `SandboxError` on any path escape. No tool can write outside the per-run staging directory.
+- **Sandboxed tool surface.** [`tools/fs.py`](digital_land_qa_agent/tools/fs.py) raises `SandboxError` on any path escape. No tool can write outside the per-run staging directory.
 - **Deterministic fallback.** Mock mode means the framework's own CI doesn't depend on a live API and the demo is reproducible.
 - **Traceable decisions.** Every model call, every tool call, every artifact is recorded in `runs/<ts>/audit.jsonl`.
 - **Bounded autonomy.** Token budgets (`task_budget_tokens`), per-response ceilings (`max_tokens`), and tool-round caps (`max_tool_rounds`) all live in settings.
@@ -95,7 +95,7 @@ dl-qa run --target <name> --goal "..."
 ## Repository layout
 
 ```
-src/digital_land_qa_agent/
+digital_land_qa_agent/
 ├── __main__.py          # CLI entrypoint
 ├── orchestrator.py      # Pipeline runner
 ├── runs.py              # Per-run dir + audit log

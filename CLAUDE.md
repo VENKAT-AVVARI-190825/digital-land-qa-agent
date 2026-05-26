@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repo.
 
 `digital-land-qa-agent` — a multi-agent QA automation framework that points at other digital-land repos and generates tests, runs checks, and produces audit artifacts. Python 3.10+, installs as the `dl-qa` CLI.
 
-It is itself an *agentic* application built on the Anthropic SDK; this repo's code calls Claude. When editing here, keep that distinction in mind: there is a difference between the agent we're building (`src/digital_land_qa_agent/`) and any code we're generating *for* a target repo.
+It is itself an *agentic* application built on the Anthropic SDK; this repo's code calls Claude. When editing here, keep that distinction in mind: there is a difference between the agent we're building (`digital_land_qa_agent/`) and any code we're generating *for* a target repo.
 
 ## Common commands
 
@@ -38,12 +38,12 @@ The repo's [action.yml](action.yml) at the root makes it consumable as a composi
 
 ## Layout
 
-- [src/digital_land_qa_agent/](src/digital_land_qa_agent/) — package root
-  - [__main__.py](src/digital_land_qa_agent/__main__.py) — Click CLI: `dl-qa run / list-targets / profile`
-  - [config.py](src/digital_land_qa_agent/config.py) — `Settings` (global) + `TargetConfig` (per-repo) loaders
-  - [orchestrator.py](src/digital_land_qa_agent/orchestrator.py) — sequential pipeline + `PipelineResult`
-  - [runs.py](src/digital_land_qa_agent/runs.py) — per-run staging dir + JSONL audit log
-  - [metrics.py](src/digital_land_qa_agent/metrics.py) — cross-run rollup feeding `dl-qa metrics`
+- [digital_land_qa_agent/](digital_land_qa_agent/) — package root
+  - [__main__.py](digital_land_qa_agent/__main__.py) — Click CLI: `dl-qa run / list-targets / profile`
+  - [config.py](digital_land_qa_agent/config.py) — `Settings` (global) + `TargetConfig` (per-repo) loaders
+  - [orchestrator.py](digital_land_qa_agent/orchestrator.py) — sequential pipeline + `PipelineResult`
+  - [runs.py](digital_land_qa_agent/runs.py) — per-run staging dir + JSONL audit log
+  - [metrics.py](digital_land_qa_agent/metrics.py) — cross-run rollup feeding `dl-qa metrics`
   - `agents/` — `ProfilerAgent`, `PlannerAgent`, `TestWriterAgent`, `CriticAgent` (all extend `agents.base.BaseAgent`)
   - `llm/` — `client.LiveClient` (Anthropic SDK) + `mock.MockClient` (deterministic fixtures); `build_client()` picks based on `ANTHROPIC_API_KEY`
   - `llm/fixtures.py` — pre-canned content blocks the mock returns, keyed by agent name

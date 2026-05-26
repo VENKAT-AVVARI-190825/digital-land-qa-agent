@@ -18,17 +18,17 @@ This repo covers ~80% of the JD's **AI / QA-automation pillar** (agentic AI, tes
 
 | JD responsibility | Where in the repo |
 |---|---|
-| Test automation frameworks that increase release quality, reduce manual regression effort | The whole pipeline — [orchestrator.py](src/digital_land_qa_agent/orchestrator.py), agents in [agents/](src/digital_land_qa_agent/agents/) |
+| Test automation frameworks that increase release quality, reduce manual regression effort | The whole pipeline — [orchestrator.py](digital_land_qa_agent/orchestrator.py), agents in [agents/](digital_land_qa_agent/agents/) |
 | Support continuous integration practices | [.github/workflows/ci.yml](.github/workflows/ci.yml) — ruff + pytest on Python 3.10 / 3.11 / 3.12 |
 | AI agents to automate repetitive workflows | The whole demo — dev writes implementation, agent writes the tests |
 | Agentic AI patterns that organize tasks into goal-oriented plans | Profiler → Planner → TestWriter → Critic sequential pipeline; structured JSON between stages |
 | Autonomous agents with human-in-the-loop oversight | `hitl_required: true` in [config/settings.yaml](config/settings.yaml); agent stages to `runs/`, human moves to target |
-| Compliance with enterprise standards, performance expectations and security guardrails | [tools/fs.py](src/digital_land_qa_agent/tools/fs.py) `SandboxError`; Critic gates on target's own lint commands |
+| Compliance with enterprise standards, performance expectations and security guardrails | [tools/fs.py](digital_land_qa_agent/tools/fs.py) `SandboxError`; Critic gates on target's own lint commands |
 | Standardize coding practices, version control, test automation guidelines | ruff on framework, target's own black + flake8 + isort on generated tests, 16 framework tests, clean git history |
 | Coordinate integration of AI agents with existing applications and APIs, traceable decision paths | Structured plan / profile / verdict JSON between agents; JSONL audit log per run; `dl-qa metrics` rollup |
-| Monitor performance of deployed AI agents, refining over time | [metrics.py](src/digital_land_qa_agent/metrics.py) + `dl-qa metrics` — approval rate, avg revisions, token spend, mode counts |
+| Monitor performance of deployed AI agents, refining over time | [metrics.py](digital_land_qa_agent/metrics.py) + `dl-qa metrics` — approval rate, avg revisions, token spend, mode counts |
 | Guide root cause analysis for production issues | `runs/<ts>/audit.jsonl` records every model call, every tool call, every artifact — *which* agent failed is always answerable |
-| Prepare technical documentation and knowledge share | [README.md](README.md), [CLAUDE.md](CLAUDE.md), per-agent system prompts in [prompts/](src/digital_land_qa_agent/prompts/) |
+| Prepare technical documentation and knowledge share | [README.md](README.md), [CLAUDE.md](CLAUDE.md), per-agent system prompts in [prompts/](digital_land_qa_agent/prompts/) |
 | Ethical AI, data privacy, secure coding | Agent never writes to target repo (staging-only); sandboxed tool surface; no creds in code (`.env.example` only); audit-by-default |
 
 ## Qualifications → repo
@@ -36,8 +36,8 @@ This repo covers ~80% of the JD's **AI / QA-automation pillar** (agentic AI, tes
 | JD qualification | Repo evidence |
 |---|---|
 | Test automation, maintainable test suites | Generated tests match target's existing style; framework has its own pytest suite (16 tests, green) |
-| AI agents: prompt orchestration, context management, evaluation of outputs | Four narrow system prompts in [prompts/](src/digital_land_qa_agent/prompts/); Critic agent does evaluation |
-| Agentic AI: task decomposition, planning, tool use | Planner decomposes goal → test cases; tool registry in [tools/registry.py](src/digital_land_qa_agent/tools/registry.py); sandboxed tool execution |
+| AI agents: prompt orchestration, context management, evaluation of outputs | Four narrow system prompts in [prompts/](digital_land_qa_agent/prompts/); Critic agent does evaluation |
+| Agentic AI: task decomposition, planning, tool use | Planner decomposes goal → test cases; tool registry in [tools/registry.py](digital_land_qa_agent/tools/registry.py); sandboxed tool execution |
 | Scripting / programming for automation | Python 3.10+, Click CLI, type hints, dataclasses |
 | Cloud / DevOps practices, CI pipelines, automated quality gates | GitHub Actions matrix CI; Critic is itself a quality gate that mirrors the target's CI rules |
 | Communicate complex tech topics clearly | README structure, CLAUDE.md "design principles" section, agent prompts written as docs |
